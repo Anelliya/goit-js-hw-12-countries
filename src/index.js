@@ -42,6 +42,7 @@ function setMarkUp(url, event) {
             }
         })
         .catch(err => {
+            console.log(err);
             event.target.value = '';
             PNotify.error({
                 text: 'Incorect input! Please, try again!',
