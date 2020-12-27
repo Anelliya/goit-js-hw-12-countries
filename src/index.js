@@ -1,7 +1,7 @@
 import './styles.css';
 import debounce from 'lodash.debounce';
 import setFullInfoTemplate from './template/temp.hbs';
-import setBaseInfoTemplate from './template/temp2.hbs';
+import setListTemplate from './template/temp2.hbs';
 import '@pnotify/core/dist/PNotify.css';
 import * as PNotify from '@pnotify/core';
 import '@pnotify/core/dist/BrightTheme.css';
@@ -9,6 +9,28 @@ import '@pnotify/core/dist/BrightTheme.css';
 const countriesDataBaseUrl = 'https://restcountries.eu/rest/v2/name/';
 const itemsRef = document.querySelector('[class=result]');
 const inputRef = document.querySelector('[class=input-field]');
+const listOfCountriesRef = document.querySelector('[class=list_style_base]');
+
+function createMarkUp(data, template) {
+    itemsRef.insertAdjacentHTML('beforeend', template(data));
+}
+
+function notifyMuchFound() {
+    PNotify.error({
+        stack: window.maxOpenWait,
+        text: 'To many maches found! Plese enter a more specific query!',
+        icon: true,
+        delay: 1500,
+    });
+}
+
+function notifyIncorectInput() {
+    PNotify.error({
+        text: 'Incorect input! Please, try again!',
+        icon: true,
+        delay: 2000,
+    });
+}
 
 function setMarkUp(url, event) {
     fetch(url)
@@ -21,34 +43,17 @@ function setMarkUp(url, event) {
         .then(data => {
             console.log(data);
             if (data.length > 1 && data.length < 10) {
-                return itemsRef.insertAdjacentHTML(
-                    'beforeend',
-                    setBaseInfoTemplate(data),
-                );
+                return createMarkUp(data, setListTemplate);
             }
             if (data.length === 1) {
-                return itemsRef.insertAdjacentHTML(
-                    'beforeend',
-                    setFullInfoTemplate(data),
-                );
+                return createMarkUp(data, setFullInfoTemplate);
             } else {
-                return PNotify.error({
-                    stack: window.maxOpenWait,
-                    text:
-                        'To many maches found! Plese enter a more specific query!',
-                    icon: true,
-                    delay: 1500,
-                });
+                return notifyMuchFound();
             }
         })
         .catch(err => {
-            console.log(err);
             event.target.value = '';
-            PNotify.error({
-                text: 'Incorect input! Please, try again!',
-                icon: true,
-                delay: 2000,
-            });
+            notifyIncorectInput();
         });
 }
 
